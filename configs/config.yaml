@@ -1,0 +1,36 @@
+models:
+  name: simple_cnn
+  input_size: 28
+  num_classes: 10
+
+train:
+  batch_size: 64
+  epochs: 10
+  learning_rate: 0.001
+  seed: 42
+
+data:
+  dataset: FashionMNIST
+  data_dir: ./data
+  split_ratio: 0.8
+
+
+# Epoch 0 | Train Loss: 0.4919, Train Acc: 0.8206 |  Val Loss: 0.3468, Val Acc: 0.8740                                                                  
+# [INFO] Saved best model to: checkpoints/2025-05-12_21-47-33_SimpleCNN_epoch0_valloss0.3468.pth
+# Epoch 1 | Train Loss: 0.3123, Train Acc: 0.8865 |  Val Loss: 0.2999, Val Acc: 0.8908                                                                  
+# [INFO] Saved best model to: checkpoints/2025-05-12_21-47-33_SimpleCNN_epoch1_valloss0.2999.pth
+# Epoch 2 | Train Loss: 0.2615, Train Acc: 0.9037 |  Val Loss: 0.2832, Val Acc: 0.8981                                                                  
+# [INFO] Saved best model to: checkpoints/2025-05-12_21-47-33_SimpleCNN_epoch2_valloss0.2832.pth
+# Epoch 3 | Train Loss: 0.2316, Train Acc: 0.9150 |  Val Loss: 0.2462, Val Acc: 0.9122                                                                  
+# [INFO] Saved best model to: checkpoints/2025-05-12_21-47-33_SimpleCNN_epoch3_valloss0.2462.pth
+# Epoch 4 | Train Loss: 0.2061, Train Acc: 0.9238 |  Val Loss: 0.2385, Val Acc: 0.9127                                                                  
+# [INFO] Saved best model to: checkpoints/2025-05-12_21-47-33_SimpleCNN_epoch4_valloss0.2385.pth
+# Epoch 5 | Train Loss: 0.1867, Train Acc: 0.9310 |  Val Loss: 0.2362, Val Acc: 0.9151                                                                  
+# [INFO] Saved best model to: checkpoints/2025-05-12_21-47-33_SimpleCNN_epoch5_valloss0.2362.pth
+# Epoch 6 | Train Loss: 0.1675, Train Acc: 0.9394 |  Val Loss: 0.2287, Val Acc: 0.9189                                                                  
+# [INFO] Saved best model to: checkpoints/2025-05-12_21-47-33_SimpleCNN_epoch6_valloss0.2287.pth
+# Epoch 7 | Train Loss: 0.1512, Train Acc: 0.9438 |  Val Loss: 0.2264, Val Acc: 0.9215                                                                  
+# [INFO] Saved best model to: checkpoints/2025-05-12_21-47-33_SimpleCNN_epoch7_valloss0.2264.pth
+# Epoch 8 | Train Loss: 0.1338, Train Acc: 0.9501 |  Val Loss: 0.2294, Val Acc: 0.9206                                                                  
+# Epoch 9 | Train Loss: 0.1175, Train Acc: 0.9568 |  Val Loss: 0.2426, Val Acc: 0.9224                                                                  
+# [Test Accuracy] 91.54% 

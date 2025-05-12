@@ -1,0 +1,8 @@
+torch
+numpy
+pandas 
+matplotlib
+tensorboard
+pillow
+tqdm
+git+https://github.com/jacobgil/pytorch-grad-cam.git
