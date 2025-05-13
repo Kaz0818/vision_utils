@@ -225,7 +225,7 @@ for i, (img, pred, label) in enumerate(misclassified):
     ax = axes[i // 4][i % 4]
 
     # Grad-CAM 実行（img: Tensor [1,28,28]）
-    cam, _ = apply_gradcam(model, img, target_layer=model.net[3], class_idx=pred, device=device)
+    cam, _ = apply_gradcam(model, img, target_layer=model.layer4[1].conv2, class_idx=pred, device=device)
 
     # 表示用画像
     img_np = img.squeeze().cpu().numpy()
