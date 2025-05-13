@@ -4,6 +4,7 @@ from datetime import datetime
 
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import torch
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
@@ -133,107 +134,158 @@ test_preds = trainer.predict(test_loader)  # trainerを再利用
 
 # =================Grad-CAMで複数画像を表示　=========================================
 # 出力ディレクトリ作成
-os.makedirs("outputs", exist_ok=True)
+# os.makedirs("outputs", exist_ok=True)
 
-# test画像から16枚だけ取得
-sample_imgs, sample_labels = next(iter(test_loader))
-sample_imgs = sample_imgs[:16]
-sample_labels = sample_labels[:16]
+# # test画像から16枚だけ取得
+# sample_imgs, sample_labels = next(iter(test_loader))
+# sample_imgs = sample_imgs[:16]
+# sample_labels = sample_labels[:16]
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model.to(device)
-model.eval()
-timestamp_grad_cam = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-# Grad-CAM適用して画像リストを生成
-fig, axes = plt.subplots(4, 4, figsize=(12, 12))
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# model.to(device)
+# model.eval()
+# timestamp_grad_cam = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+# # Grad-CAM適用して画像リストを生成
+# fig, axes = plt.subplots(4, 4, figsize=(12, 12))
 
-for idx, ax in enumerate(axes.flat):
-    img = sample_imgs[idx]
-    label = sample_labels[idx].item()
+# for idx, ax in enumerate(axes.flat):
+#     img = sample_imgs[idx]
+#     label = sample_labels[idx].item()
 
-    # Grad-CAM 実行
-    cam, pred = apply_gradcam(model, img, target_layer=model.layer4[1].conv2, device=device)
-    # cam, pred = apply_gradcam(model, img, target_layer=model.net[3], device=device)
+#     # Grad-CAM 実行
+#     cam, pred = apply_gradcam(model, img, target_layer=model.layer4[1].conv2, device=device)
+#     # cam, pred = apply_gradcam(model, img, target_layer=model.net[3], device=device)
 
-    # 画像変換（白黒＋ヒートマップ）
-    img_np = img.squeeze().cpu().numpy()
-    ax.imshow(img_np, cmap='gray')
-    ax.imshow(cam, cmap='jet', alpha=0.5)
-    ax.set_title(f"GT: {label} / Pred: {pred}", fontsize=9)
-    ax.axis('off')
+#     # 画像変換（白黒＋ヒートマップ）
+#     img_np = img.squeeze().cpu().numpy()
+#     ax.imshow(img_np, cmap='gray')
+#     ax.imshow(cam, cmap='jet', alpha=0.5)
+#     ax.set_title(f"GT: {label} / Pred: {pred}", fontsize=9)
+#     ax.axis('off')
 
-plt.tight_layout()
+# plt.tight_layout()
 
-plt.savefig(f"outputs/{timestamp_grad_cam}_gradcam_batch.png")
-plt.show()
-plt.close()
-
-
-# gridを作成（normalizeで見やすく）
-grid = make_grid(sample_imgs, nrow=4, normalize=True)
-
-writer = SummaryWriter(log_dir="logs/tensorboard_logs")
-writer.add_image("Test Images", grid)
-writer.close()
+# plt.savefig(f"outputs/{timestamp_grad_cam}_gradcam_batch.png")
+# plt.show()
+# plt.close()
 
 
-# ====================== GradCAMで間違えた画像だけ表示する ==========================
+# # gridを作成（normalizeで見やすく）
+# grid = make_grid(sample_imgs, nrow=4, normalize=True)
 
-# 保存ディレクトリ作成
-os.makedirs("outputs", exist_ok=True)
-
-# 1. 予測
-preds = trainer.predict(test_loader)
-true_labels = [label for _, label in test_dataset]
-
-# 2. 誤分類だけ抽出
-misclassified = [(img, pred, label)
-                 for (img, label), pred in zip(test_dataset, preds)
-                 if pred != label]
-
-# 3. 上位 N 件だけ表示
-N = 16
-misclassified = misclassified[:N]
-
-# 4. 描画
-fig, axes = plt.subplots(4, 4, figsize=(12, 12))
-
-for i, (img, pred, label) in enumerate(misclassified):
-    ax = axes[i // 4][i % 4]
-    ax.imshow(img.squeeze(), cmap="gray")
-    ax.set_title(f"GT: {label} / Pred: {pred}", fontsize=9)
-    ax.axis("off")
-
-plt.tight_layout()
-plt.savefig(f"outputs/{timestamp_grad_cam}_misclassified.png")
-plt.show()
+# writer = SummaryWriter(log_dir="logs/tensorboard_logs")
+# writer.add_image("Test Images", grid)
+# writer.close()
 
 
+# # ====================== GradCAMで間違えた画像だけ表示する ==========================
 
-# ===========GradCAMで誤分類を表示================
-# 出力フォルダ作成
-os.makedirs("outputs", exist_ok=True)
+# # 保存ディレクトリ作成
+# os.makedirs("outputs", exist_ok=True)
 
-# 最大表示数
-N = 16
-misclassified = misclassified[:N]
+# # 1. 予測
+# preds = trainer.predict(test_loader)
+# true_labels = [label for _, label in test_dataset]
 
-# Grad-CAM付きで描画
-fig, axes = plt.subplots(4, 4, figsize=(12, 12))
+# # 2. 誤分類だけ抽出
+# misclassified = [(img, pred, label)
+#                  for (img, label), pred in zip(test_dataset, preds)
+#                  if pred != label]
 
-for i, (img, pred, label) in enumerate(misclassified):
-    ax = axes[i // 4][i % 4]
+# # 3. 上位 N 件だけ表示
+# N = 16
+# misclassified = misclassified[:N]
 
-    # Grad-CAM 実行（img: Tensor [1,28,28]）
-    cam, _ = apply_gradcam(model, img, target_layer=model.layer4[1].conv2, class_idx=pred, device=device)
+# # 4. 描画
+# fig, axes = plt.subplots(4, 4, figsize=(12, 12))
 
-    # 表示用画像
-    img_np = img.squeeze().cpu().numpy()
-    ax.imshow(img_np, cmap='gray')
-    ax.imshow(cam, cmap='jet', alpha=0.5)
-    ax.set_title(f"GT: {label} / Pred: {pred}", fontsize=9)
-    ax.axis("off")
+# for i, (img, pred, label) in enumerate(misclassified):
+#     ax = axes[i // 4][i % 4]
+#     ax.imshow(img.squeeze(), cmap="gray")
+#     ax.set_title(f"GT: {label} / Pred: {pred}", fontsize=9)
+#     ax.axis("off")
 
-plt.tight_layout()
-plt.savefig(f"outputs/{timestamp_grad_cam}_misclassified_gradcam.png")
-plt.show()
+# plt.tight_layout()
+# plt.savefig(f"outputs/{timestamp_grad_cam}_misclassified.png")
+# plt.show()
+
+
+
+# # ===========GradCAMで誤分類を表示================
+# # 出力フォルダ作成
+# os.makedirs("outputs", exist_ok=True)
+
+# # 最大表示数
+# N = 16
+# misclassified = misclassified[:N]
+
+# # Grad-CAM付きで描画
+# fig, axes = plt.subplots(4, 4, figsize=(12, 12))
+
+# for i, (img, pred, label) in enumerate(misclassified):
+#     ax = axes[i // 4][i % 4]
+
+#     # Grad-CAM 実行（img: Tensor [1,28,28]）
+#     cam, _ = apply_gradcam(model, img, target_layer=model.layer4[1].conv2, class_idx=pred, device=device)
+
+#     # 表示用画像
+#     img_np = img.squeeze().cpu().numpy()
+#     ax.imshow(img_np, cmap='gray')
+#     ax.imshow(cam, cmap='jet', alpha=0.5)
+#     ax.set_title(f"GT: {label} / Pred: {pred}", fontsize=9)
+#     ax.axis("off")
+
+# plt.tight_layout()
+# plt.savefig(f"outputs/{timestamp_grad_cam}_misclassified_gradcam.png")
+# plt.show()
+
+
+
+
+
+# device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+# def plot_confusion_matrix_display(model, dataloader, class_names, device=device, normalize=True, save_path=None):
+    
+#     model.eval()
+#     y_true = []
+#     y_pred = []
+    
+
+#     with torch.no_grad():
+#         for x, y in dataloader:
+#             x, y = x.to(device), y.to(device)
+#             outputs = model(x)
+#             preds = torch.argmax(outputs, dim=1)
+#             y_true.extend(y.cpu().tolist())
+#             y_pred.extend(preds.cpu().tolist())
+
+#     # 混同行列を生成
+#     cm = confusion_matrix(y_true, y_pred, normalize='true' if normalize else None)
+
+#     # 混同行列を表示
+#     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=class_names)
+#     fig, ax = plt.subplots(figsize=(8, 6))
+#     disp.plot(ax=ax, cmap=plt.cm.Blues, colorbar=True)
+#     plt.title("Confusion Matrix (Normalized)" if normalize else "Confusion Matrix")
+#     plt.xticks(rotation=45)
+#     plt.tight_layout()
+
+#     if save_path:
+#         plt.savefig(save_path)
+#         print(f"[INFO] Saved confusion matrix to {save_path}")
+#     else:
+#         plt.show()
+
+#     plt.close()
+
+
+
+cm_path = f"results/cm_epoch{cfg['train']['epochs']}.png"
+trainer.plot_confusion_matrix_display(
+    model=trainer.model,
+    dataloader=val_loader,
+    class_names=val_loader.dataset.dataset.classes,
+    cm_save_path=cm_path,
+    epoch=1
+)
