@@ -1,5 +1,5 @@
 models:
-  name: resnet18
+  name: simple_cnn
   input_size: 28
   num_classes: 10
 

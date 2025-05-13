@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 import torch
 from torchvision import transforms
 from torch.utils.tensorboard import SummaryWriter
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+from PIL import Image
+import io
+import numpy as np
 
 # 学習ループ
 class Trainer:
@@ -36,7 +40,7 @@ class Trainer:
         self.train_losses, self.train_accuracies = [], []
         self.val_losses,   self.val_accuracies   = [], []
         best_val_loss = float('inf')
-        no_improve    = 0
+        no_improve = 0
         
         try:
             for epoch in range(self.num_epochs):
@@ -190,5 +194,53 @@ class Trainer:
         if return_probs:
             return preds, probs
         return preds
-        
 
+    def plot_confusion_matrix_display(self, model, dataloader, class_names, device=None, normalize=True, cm_save_path=None, epoch=None):
+        
+        device = device if device else self.device
+        model.eval()
+        y_true = []
+        y_pred = []
+    
+        with torch.no_grad():
+            for x, y in dataloader:
+                x, y = x.to(device), y.to(device)
+                outputs = model(x)
+                preds = torch.argmax(outputs, dim=1)
+                y_true.extend(y.cpu().tolist())
+                y_pred.extend(preds.cpu().tolist())
+            
+    
+        # 混同行列を生成
+        cm = confusion_matrix(y_true, y_pred, normalize='true' if normalize else None)
+    
+        # ConfusionMatrixDisplay でプロット
+        disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=class_names)
+        fig, ax = plt.subplots(figsize=(8, 6))
+        disp.plot(ax=ax, cmap=plt.cm.Blues, colorbar=True)
+        plt.title("Confusion Matrix (Normalized)" if normalize else "Confusion Matrix")
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+    
+        # --- TensorBoardに画像として追加 ---
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        image = Image.open(buf).convert("RGB")
+        image_np = np.array(image)
+        image_tensor = torch.tensor(image_np).permute(2, 0, 1).float() / 255.0
+        tag = 'Confusion_Matrix_Display'
+        step = epoch if epoch is not None else 0
+        self.writer.add_image(tag, image_tensor, global_step=step)
+    
+        # 保存（任意）
+        if cm_save_path:
+            os.makedirs('results', exist_ok=True)
+            image.save(cm_save_path)
+            print(f"[INFO] Saved confusion matrix image to {cm_save_path}")
+        else:
+            plt.show()
+    
+        plt.close()
+                
+        
