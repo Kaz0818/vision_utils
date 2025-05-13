@@ -14,6 +14,7 @@ from models.model_cnn import SimpleCNN, SimpleCNNWithKaiming
 from trainers.train import Trainer
 from utils.save_load import save_model, load_model
 from utils.gradcam_utils import apply_gradcam
+from models.model_selector import get_model
 
 # ========= Config読み取り・シード設定　=================
 # config 読み込み
@@ -48,7 +49,10 @@ test_loader = DataLoader(test_dataset, batch_size=cfg['train']['batch_size'], sh
 
 # model = SimpleCNN(num_classes=cfg["models"]["num_classes"])
 # model = SimpleCNN(num_classes=cfg["models"]["num_classes"])
-model = SimpleCNNWithKaiming(num_classes=cfg['models']['num_classes'])
+# model = SimpleCNNWithKaiming(num_classes=cfg['models']['num_classes'])
+
+# モデル構築(転移学習)
+model = get_model(cfg['models']['name'], num_classes=cfg['models']['num_classes'])
 
 
 # ===============損失関数と最適化とTrainerの初期化=================================
@@ -85,7 +89,8 @@ print(f"[Test Accuracy] {acc * 100:.2f}%")
 
 # ==========学習済みのモデルをロードして学習========================================
 # モデルを再構築（構造は事前に一致させること！）
-model = SimpleCNN(num_classes=cfg["models"]["num_classes"])
+# model = SimpleCNN(num_classes=cfg["models"]["num_classes"])
+model = get_model(cfg['models']['name'], num_classes=cfg['models']['num_classes'])
 optimizer = torch.optim.Adam(model.parameters(), lr=cfg["train"]["learning_rate"])
 
 # 保存済みモデルの読み込み
@@ -147,7 +152,8 @@ for idx, ax in enumerate(axes.flat):
     label = sample_labels[idx].item()
 
     # Grad-CAM 実行
-    cam, pred = apply_gradcam(model, img, target_layer=model.net[3], device=device)
+    cam, pred = apply_gradcam(model, img, target_layer=model.layer4[1].conv2, device=device)
+    # cam, pred = apply_gradcam(model, img, target_layer=model.net[3], device=device)
 
     # 画像変換（白黒＋ヒートマップ）
     img_np = img.squeeze().cpu().numpy()
