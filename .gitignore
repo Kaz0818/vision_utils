@@ -33,8 +33,10 @@ checkpoints/
 
 # TensorBoardログ
 runs/
+logs/
 notebooks/runs_exp3/
 notebooks/runs/*
+notebooks/logs/*
 
 # ゴミ箱系（Trash関連）
 .Trash-*/
