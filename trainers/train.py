@@ -87,10 +87,6 @@ class Trainer:
                 self.train_losses.append(avg_train_loss)
                 self.train_accuracies.append(avg_train_acc)
                 
-                # TensorBoardに表示する
-                self.writer.add_scalar('Train Loss', avg_train_loss, epoch)
-                self.writer.add_scalar('Train Accuracy', avg_train_acc, epoch)
-
                 # -------Validation----------
                 # 検証モードに切り替え
                 self.model.eval()
@@ -128,7 +124,10 @@ class Trainer:
                 self.val_losses.append(avg_val_loss)
                 self.val_accuracies.append(avg_val_acc)
                 # Tensorboard に表示するため、epoch毎のloss,accuracyを記録する
+                # TensorBoardに表示する
+                self.writer.add_scalar('Train Loss', avg_train_loss, epoch)
                 self.writer.add_scalar('Val Loss', avg_val_loss, epoch)
+                self.writer.add_scalar('Train Accuracy', avg_train_acc, epoch)
                 self.writer.add_scalar('Val Accuracy', avg_val_acc, epoch)
 
                 print(
