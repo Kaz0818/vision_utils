@@ -18,7 +18,7 @@ class TrainerConfig:
     TIMESTAMP_FORMAT = '%Y-%m-%d_%H-%M-%S'
 
 
-class MixupTrainer:
+class MultiGpuMixupTrainer:
     def __init__(self, 
                  train_loader: DataLoader,
                  val_loader: DataLoader,
