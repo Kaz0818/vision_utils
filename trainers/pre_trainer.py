@@ -269,7 +269,7 @@ class MixupTrainer:
                 
                 # TensorBoardグラフの追加（最初のバッチのみ）
                 if is_training and epoch == 0 and batch_idx == 0:
-                    self.writer.add_graph(self.model, X)
+                    self.writer.add_graph(self.model.module, X)
                 
                 # mixupの適用（訓練時のみ）
                 if is_training and self.use_mixup:
