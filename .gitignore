@@ -46,3 +46,6 @@ notebooks/logs/*
 ~/.local/share/Trash/*
 **/.Trash-*
 **/.trash
+
+# github　templete
+.github/
