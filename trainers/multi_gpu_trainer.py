@@ -25,7 +25,7 @@ class MultiGpuMixupTrainer:
                  model: nn.Module,
                  train_criterion: Optional[nn.Module] = None,  # 訓練用損失関数
                  val_criterion: Optional[nn.Module] = None,    # 検証用損失関数
-                 optimizer = None,
+                 optimizer = torch.optim.Optimizer,
                  num_epochs: int = 100,
                  device: Optional[torch.device] = None,
                  early_stopping: Optional[int] = None,
