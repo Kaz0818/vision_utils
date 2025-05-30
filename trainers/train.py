@@ -68,7 +68,8 @@ class Trainer:
                     loss.backward()
                     self.optimizer.step()
 
-                    # ここの * batch_sizeをなぜしているかわからない
+                    # 平均の損失になっているので、Batch sizeを掛ける
+                    # 1バッチ分の損失を累積
                     running_train_loss += loss.item() * batch_size
                     # accuracyを累積
                     running_train_correct += (preds.argmax(dim=1) == y).sum().item()
@@ -106,7 +107,8 @@ class Trainer:
                         val_preds = self.model(X_val)
                         val_loss = self.criterion(val_preds, y_val)
 
-                        # ここの * batch_sizeをなぜしているかわからない
+                        # バッチサイズを掛けて累積
+                        # 1バッチ分の損失を累積
                         running_val_loss += val_loss.item() * batch_size
                         running_val_correct += (val_preds.argmax(dim=1) == y_val).sum().item()
                         # 最後batch分で割って平均をだすので保存する
