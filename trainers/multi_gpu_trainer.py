@@ -494,35 +494,3 @@ class MultiGpuMixupTrainer:
             print(f"[INFO] Checkpoint val_loss: {checkpoint.get('val_loss', 'Unknown'):.4f}")
 
 
-# 使用例とヘルパー関数
-def create_mixup_trainer(train_loader, val_loader, model, optimizer, 
-                        mixup_alpha=0.2, cutmix_alpha=1.0, num_classes=1000,
-                        label_smoothing=0.1, **kwargs):
-    """
-    Mixup対応Trainerの作成ヘルパー関数
-    
-    Args:
-        train_loader: 訓練用DataLoader
-        val_loader: 検証用DataLoader  
-        model: モデル
-        optimizer: オプティマイザー
-        mixup_alpha: mixupのアルファ値
-        cutmix_alpha: cutmixのアルファ値
-        num_classes: クラス数
-        label_smoothing: ラベルスムージング値
-        **kwargs: その他のTrainerパラメータ
-    
-    Returns:
-        MixupTrainer: 設定済みのTrainerインスタンス
-    """
-    return MixupTrainer(
-        train_loader=train_loader,
-        val_loader=val_loader,
-        model=model,
-        optimizer=optimizer,
-        mixup_alpha=mixup_alpha,
-        cutmix_alpha=cutmix_alpha,
-        num_classes=num_classes,
-        label_smoothing=label_smoothing,
-        **kwargs
-    )
