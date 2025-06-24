@@ -1,7 +1,7 @@
 # パスだけ受け取るのでメモリ効率がいい
 class MyDataset(Dataset):
     def __init__(self, image_paths, labels, tranform=None):
-        self.image_paths = imagespaths # <- パスだけ保存(軽い)
+        self.image_paths = image_paths # <- パスだけ保存(軽い)
         self.labels = labels
         self.transform = transform
 
