@@ -46,4 +46,5 @@ def setup_image_dataset(base_path_str, test_size=0.2):
     }
 
 # ===== 使用方法（毎回これだけ） =====
-data_info = setup_image_dataset('/kaggle/input/your-dataset/folder')
+# data_info = setup_image_dataset('/kaggle/input/syour-dataset/folder')
+
