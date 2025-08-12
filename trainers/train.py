@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import torch
@@ -26,7 +27,7 @@ class Trainer:
         self.log_dir = log_dir
         self.writer = writer
         self.model_name = self.model.__class__.__name__
-        self.timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        self.timestamp = datetime.now(ZoneInfo("Asia/Tokyo")).strftime('%Y-%m-%d_%H-%M-%S')
         self.model.to(self.device)
 
         if self.writer is None:
@@ -91,7 +92,7 @@ class Trainer:
                 running_val_correct = 0
                 running_val_samples = 0
 
-                with torch.no_grad():
+                with torch.no_grad(): 
                     
                     for X_val, y_val in tqdm(self.val_loader,
                                             desc='Validation',
@@ -146,7 +147,7 @@ class Trainer:
                     # 学習時間、modelの名前やepoch数 val lossの情報を.pthで保存
                     filename_full = os.path.join(
                         base_dir,
-                        f'{self.timestamp}_{self.model_name}_epoch{epoch}_vallloss{avg_val_loss:.4f}.pth'
+                        f'{self.timestamp}_{self.model_name}_epoch{epoch}_val-lloss{avg_val_loss:.4f}.pth'
                     )
                     # best modelの重み、optimizer, loss　, epoch　数を登録
                     state = {
@@ -158,7 +159,7 @@ class Trainer:
                     # stateの情報を作成したfilepathに保存
                     torch.save(state, filename_best)
                     torch.save(state, filename_full)
-                    print(f'[INFO] Saved best modelto: {filename_full}')
+                    print(f'[INFO] Saved best model to: {filename_full}')
                 else:
                     # もしもlossが前回より下がらなかったら +1する. early stoppingで5に設定していれば5になったら学習ストップ
                     no_improve += 1
