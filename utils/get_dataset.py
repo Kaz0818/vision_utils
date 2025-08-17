@@ -23,14 +23,14 @@ def collect_image_paths(root: Path, class_to_id: dict):
     return paths, targets
 
 # ===== 4) 変換（理解済みとのこと・最小構成） =====
-def build_transforms(sz=IMG_SIZE):
+def build_transforms(img_size=int):
     train_tf = A.Compose([
-        A.Resize(sz, sz), A.HorizontalFlip(p=0.5),
+        A.Resize(img_size, img_size), A.HorizontalFlip(p=0.5),
         A.Normalize(mean=(0.485,0.456,0.406), std=(0.229,0.224,0.225)),
         ToTensorV2(),
     ])
     valid_tf = A.Compose([
-        A.Resize(sz, sz),
+        A.Resize(img_size, img_size),
         A.Normalize(mean=(0.485,0.456,0.406), std=(0.229,0.224,0.225)),
         ToTensorV2(),
     ])
@@ -39,8 +39,8 @@ def build_transforms(sz=IMG_SIZE):
 # ===== 5) Dataset =====
 class PathDataset(Dataset):
     def __init__(self, paths, targets, transform=None):
-        self.paths = list(paths);
-        self.targets = list(targets);
+        self.paths = list(paths)
+        self.targets = list(targets)
         self.transform = transform
         
     def __len__(self):
@@ -65,10 +65,11 @@ def build_loaders(TRAIN_ROOT, VAL_ROOT, IMG_SIZE, BATCH_SIZE):
     classes, class_to_id, id_to_class = build_class_maps(TRAIN_ROOT)
     train_paths, train_targets = collect_image_paths(TRAIN_ROOT, class_to_id)
     val_paths,   val_targets   = collect_image_paths(VAL_ROOT,   class_to_id)
-    train_tf, valid_tf = build_transforms(IMG_SIZE)
+    train_transform, valid_transform = build_transforms(IMG_SIZE)
 
-    ds_tr = PathDataset(train_paths, train_targets, train_tf)
-    ds_va = PathDataset(val_paths,   val_targets,   valid_tf)
-    dl_tr = DataLoader(ds_tr, batch_size=BATCH_SIZE, shuffle=True,  num_workers=0, pin_memory=True)
-    dl_va = DataLoader(ds_va, batch_size=BATCH_SIZE, shuffle=False, num_workers=0, pin_memory=True)
+    train_dataset = PathDataset(train_paths, train_targets, train_transform)
+    val_dataset = PathDataset(val_paths, val_targets, valid_transform, valid_transform = build_transforms(IMG_SIZE)
+)
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True,  num_workers=0, pin_memory=True)
+    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=0, pin_memory=True)
     
