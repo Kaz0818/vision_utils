@@ -68,8 +68,11 @@ def build_loaders(TRAIN_ROOT, VAL_ROOT, IMG_SIZE, BATCH_SIZE):
     train_transform, valid_transform = build_transforms(IMG_SIZE)
 
     train_dataset = PathDataset(train_paths, train_targets, train_transform)
-    val_dataset = PathDataset(val_paths, val_targets, valid_transform, valid_transform = build_transforms(IMG_SIZE)
-)
+    val_dataset = PathDataset(val_paths, val_targets, valid_transform, valid_transform = build_transforms(IMG_SIZE))
+
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True,  num_workers=0, pin_memory=True)
     val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=0, pin_memory=True)
     
+    xb, yb = next(iter(train_loader))
+    assert xb.ndim==4 and xb.shape[1]==3 and xb.dtype==torch.float32
+    return train_loader, val_loader, classes
