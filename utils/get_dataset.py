@@ -1,24 +1,74 @@
-# パスだけ受け取るのでメモリ効率がいい
-class MyDataset(Dataset):
-    def __init__(self, image_paths, labels, tranform=None):
-        self.image_paths = image_paths # <- パスだけ保存(軽い)
-        self.labels = labels
+from pathlib import Path
+import cv2, albumentations as A, torch, random, numpy as np
+from albumentations.pytorch import ToTensorV2
+from torch.utils.data import Dataset, DataLoader
+
+# ===== 2) クラス辞書（決定論の要） =====
+def build_class_maps(root: Path):
+    classes = sorted([d.name for d in root.iterdir() if d.is_dir()])
+    class_to_id = {c:i for i,c in enumerate(classes)}
+    id_to_class = {i:c for c,i in class_to_id.items()}
+    return classes, class_to_id, id_to_class
+
+# ===== 3) 画像パス収集（決定論的にソート） =====
+ALLOWED_EXT = frozenset({".jpg",".jpeg",".png",".bmp",".webp"})
+def collect_image_paths(root: Path, class_to_id: dict):
+    paths, targets = [], []
+    for cname in sorted(class_to_id):
+        cid = class_to_id[cname]
+        cdir = root / cname
+        for p in sorted((q for q in cdir.rglob("*") if q.is_file()), key=lambda x: x.as_posix()):
+            if p.suffix.lower() in ALLOWED_EXT:
+                paths.append(p); targets.append(cid)
+    return paths, targets
+
+# ===== 4) 変換（理解済みとのこと・最小構成） =====
+def build_transforms(sz=IMG_SIZE):
+    train_tf = A.Compose([
+        A.Resize(sz, sz), A.HorizontalFlip(p=0.5),
+        A.Normalize(mean=(0.485,0.456,0.406), std=(0.229,0.224,0.225)),
+        ToTensorV2(),
+    ])
+    valid_tf = A.Compose([
+        A.Resize(sz, sz),
+        A.Normalize(mean=(0.485,0.456,0.406), std=(0.229,0.224,0.225)),
+        ToTensorV2(),
+    ])
+    return train_tf, valid_tf
+
+# ===== 5) Dataset =====
+class PathDataset(Dataset):
+    def __init__(self, paths, targets, transform=None):
+        self.paths = list(paths);
+        self.targets = list(targets);
         self.transform = transform
-
+        
     def __len__(self):
-        return len(self.image_paths)
-
+        return len(self.paths)
+    
     def __getitem__(self, idx):
-        # 必要な時だけ画像を読み込む
-        image_path = self.image_paths[idx]
-        labels = self.labels[idx]
-
-        # ここで初めて画像を読み込み
-        image = Image.open(image_path).convert('RGB')
-        image = np.array(image)
-
+        path = self.paths[idx]
+        image = cv2.imread(str(path))
+        if image is None: raise FileNotFoundError(path)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        
         if self.transform:
-            transformed = self.transform(image=image)
-            image = transformed['image']
+            img = self.transform(image=image)['image']
+            label = int(self.targets[idx])
+        
+        return img, label
+            
 
-        return image, label
+# ===== 6) Loader 構築 ＆ 煙テスト =====
+def build_loaders(TRAIN_ROOT, VAL_ROOT, IMG_SIZE, BATCH_SIZE):
+    # set_seed()
+    classes, class_to_id, id_to_class = build_class_maps(TRAIN_ROOT)
+    train_paths, train_targets = collect_image_paths(TRAIN_ROOT, class_to_id)
+    val_paths,   val_targets   = collect_image_paths(VAL_ROOT,   class_to_id)
+    train_tf, valid_tf = build_transforms(IMG_SIZE)
+
+    ds_tr = PathDataset(train_paths, train_targets, train_tf)
+    ds_va = PathDataset(val_paths,   val_targets,   valid_tf)
+    dl_tr = DataLoader(ds_tr, batch_size=BATCH_SIZE, shuffle=True,  num_workers=0, pin_memory=True)
+    dl_va = DataLoader(ds_va, batch_size=BATCH_SIZE, shuffle=False, num_workers=0, pin_memory=True)
+    
