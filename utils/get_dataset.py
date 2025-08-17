@@ -24,17 +24,17 @@ def collect_image_paths(root: Path, class_to_id: dict):
 
 # ===== 4) 変換（理解済みとのこと・最小構成） =====
 def build_transforms(img_size=int):
-    train_tf = A.Compose([
+    train_transform = A.Compose([
         A.Resize(img_size, img_size), A.HorizontalFlip(p=0.5),
         A.Normalize(mean=(0.485,0.456,0.406), std=(0.229,0.224,0.225)),
         ToTensorV2(),
     ])
-    valid_tf = A.Compose([
+    valid_transform = A.Compose([
         A.Resize(img_size, img_size),
         A.Normalize(mean=(0.485,0.456,0.406), std=(0.229,0.224,0.225)),
         ToTensorV2(),
     ])
-    return train_tf, valid_tf
+    return train_transform, valid_transform
 
 # ===== 5) Dataset =====
 class PathDataset(Dataset):
@@ -67,8 +67,8 @@ def build_loaders(TRAIN_ROOT, VAL_ROOT, IMG_SIZE, BATCH_SIZE):
     val_paths,   val_targets   = collect_image_paths(VAL_ROOT,   class_to_id)
     train_transform, valid_transform = build_transforms(IMG_SIZE)
 
-    train_dataset = PathDataset(train_paths, train_targets, train_transform)
-    val_dataset = PathDataset(val_paths, val_targets, valid_transform, valid_transform = build_transforms(IMG_SIZE))
+    train_dataset = PathDataset(train_paths, train_targets, transform=train_transform)
+    val_dataset = PathDataset(val_paths, val_targets, valid_transform, transform=build_transforms(IMG_SIZE))
 
     train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True,  num_workers=0, pin_memory=True)
     val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=0, pin_memory=True)
