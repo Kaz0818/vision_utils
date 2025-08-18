@@ -1,0 +1,18 @@
+[project]
+name = "vision-utils"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "grad-cam>=1.5.5",
+    "matplotlib>=3.10.5",
+    "numpy>=2.3.2",
+    "pandas>=2.3.1",
+    "pillow>=11.3.0",
+    "scikit-image>=0.25.2",
+    "scikit-learn>=1.7.1",
+    "tensorboard>=2.20.0",
+    "torch>=2.8.0",
+    "tqdm>=4.67.1",
+]
