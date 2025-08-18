@@ -38,6 +38,7 @@ def build_transforms(img_size=int):
 
 # ===== 5) Dataset =====
 class PathDataset(Dataset):
+    
     def __init__(self, paths, targets, transform=None):
         self.paths = list(paths)
         self.targets = list(targets)
@@ -60,7 +61,7 @@ class PathDataset(Dataset):
             
 
 # ===== 6) Loader 構築 ＆ 煙テスト =====
-def build_loaders(TRAIN_ROOT, VAL_ROOT, IMG_SIZE, BATCH_SIZE):
+def build_loaders(TRAIN_ROOT, VAL_ROOT, IMG_SIZE, BATCH_SIZE, build_transforms):
     # set_seed()
     classes, class_to_id, id_to_class = build_class_maps(TRAIN_ROOT)
     train_paths, train_targets = collect_image_paths(TRAIN_ROOT, class_to_id)
