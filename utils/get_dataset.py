@@ -76,4 +76,4 @@ def build_loaders(TRAIN_ROOT, VAL_ROOT, IMG_SIZE, BATCH_SIZE, build_transforms):
     
     xb, yb = next(iter(train_loader))
     assert xb.ndim==4 and xb.shape[1]==3 and xb.dtype==torch.float32
-    return train_loader, val_loader, classes
+    return train_dataset, val_dataset, train_loader, val_loader, classes
