@@ -7,4 +7,5 @@ pillow
 tqdm
 scikit-image
 scikit-learn
-git+https://github.com/jacobgil/pytorch-grad-cam.git
+# git+https://github.com/jacobgil/pytorch-grad-cam.git
+grad-cam
