@@ -1,5 +1,9 @@
 from pathlib import Path
-import cv2, albumentations as A, torch, random, numpy as np
+import random
+import numpy as np
+import torch
+import cv2
+import albumentations as A
 from albumentations.pytorch import ToTensorV2
 from torch.utils.data import Dataset, DataLoader
 
