@@ -135,41 +135,41 @@ class Visualizer:
 
 # ---------------Classification Report ------------------------
 
-def result_classification_report(model, data_loader, target_names, device):
-    """ 
-    Args:
-        model: 学習済みのmodel
-        data_loader: resultに使うdata
-        target_names: class_names
-        device: GPUで学習する場合
-    
-    example: result_classification_report(model=vit, data_loader=val_loader, target_names=class_names, device)
-    """
-    
-    model.eval()  # 評価モード
-    all_preds = []
-    all_targets = []
-    
-    with torch.no_grad():
-        for X, y in tqdm(data_loader, desc='Validation', total=len(data_loader), leave=False):
-            X = X.to(device)
-            y = y.to(device)
-            logits = model(X)
-            preds = logits.argmax(dim=1)  # softmaxは不要
-    
-            # CPU に戻してバッチごとに蓄積
-            all_preds.append(preds.detach().cpu())
-            all_targets.append(y.detach().cpu())
-    
-    # 1本のベクトルに結合して numpy へ
-    y_pred = torch.cat(all_preds).numpy()
-    y_true = torch.cat(all_targets).numpy()
-    
-    # クラス名があるなら渡す（len が一致すること）
-    # 例: target_names = class_names
-    if target_names:
-        target_names = target_names
-    else:
-        target_names = None  # あるなら class_names に置き換え
-    print(classification_report(y_true, y_pred, target_names=target_names, digits=4, zero_division=0))
+    def result_classification_report(model, data_loader, target_names, device):
+        """ 
+        Args:
+            model: 学習済みのmodel
+            data_loader: resultに使うdata
+            target_names: class_names
+            device: GPUで学習する場合
+        
+        example: result_classification_report(model=vit, data_loader=val_loader, target_names=class_names, device)
+        """
+        
+        model.eval()  # 評価モード
+        all_preds = []
+        all_targets = []
+        
+        with torch.no_grad():
+            for X, y in tqdm(data_loader, desc='Validation', total=len(data_loader), leave=False):
+                X = X.to(device)
+                y = y.to(device)
+                logits = model(X)
+                preds = logits.argmax(dim=1)  # softmaxは不要
+        
+                # CPU に戻してバッチごとに蓄積
+                all_preds.append(preds.detach().cpu())
+                all_targets.append(y.detach().cpu())
+        
+        # 1本のベクトルに結合して numpy へ
+        y_pred = torch.cat(all_preds).numpy()
+        y_true = torch.cat(all_targets).numpy()
+        
+        # クラス名があるなら渡す（len が一致すること）
+        # 例: target_names = class_names
+        if target_names:
+            target_names = target_names
+        else:
+            target_names = None  # あるなら class_names に置き換え
+        print(classification_report(y_true, y_pred, target_names=target_names, digits=4, zero_division=0))
 
