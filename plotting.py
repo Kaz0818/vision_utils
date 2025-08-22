@@ -135,7 +135,7 @@ class Visualizer:
 
 # ---------------Classification Report ------------------------
 
-    def result_classification_report(model, data_loader, target_names, device):
+    def result_classification_report(self, model, data_loader, target_names, device):
         """ 
         Args:
             model: 学習済みのmodel
